@@ -4,7 +4,7 @@ dotenv.config();
 import express from 'express';
 import {AppDataSource} from "./data-source";
 import authRoutes from "./Routes/auth.routes";
-import {authenticateJWT} from "./Middleware/auth.middleware";
+// import {authenticateJWT} from "./Middleware/auth.middleware";
 
 const app = express();
 const PORT = process.env.PORT;
