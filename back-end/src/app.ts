@@ -4,6 +4,7 @@ dotenv.config();
 import express from 'express';
 import {AppDataSource} from "./data-source";
 import authRoutes from "./Routes/auth.routes";
+import mergeRoutes from "./Routes/comparison.routes";
 // import {authenticateJWT} from "./Middleware/auth.middleware";
 
 const app = express();
@@ -17,6 +18,7 @@ if (!PORT) {
 app.use(express.json());
 
 app.use('/auth', authRoutes);
+app.use('/comparison', mergeRoutes);
 
 // app.use(authenticateJWT);
 
