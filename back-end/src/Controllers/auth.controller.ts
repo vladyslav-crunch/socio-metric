@@ -1,12 +1,10 @@
-import { Router, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
 import { User } from '../Entities/User';
 import bcrypt from 'bcryptjs';
-import {generateToken} from "../utils/jwt";
+import { generateToken } from '../utils/jwt';
 
-const router = Router();
-
-router.post('/register', async (req: Request, res: Response): Promise<void> => {
+export const register = async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
     const repo = AppDataSource.getRepository(User);
     const existing = await repo.findOneBy({ email });
@@ -19,9 +17,9 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     const user = repo.create({ name, email, password: hashed });
     await repo.save(user);
     res.status(201).json({ message: 'User registered' });
-});
+};
 
-router.post('/login', async (req: Request, res: Response): Promise<void> => {
+export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const repo = AppDataSource.getRepository(User);
     const user = await repo.findOneBy({ email });
@@ -32,8 +30,4 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
     const token = generateToken(user!);
     res.json({ token });
-});
-
-
-
-export default router;
+};

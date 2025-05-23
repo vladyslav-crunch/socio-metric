@@ -11,8 +11,7 @@ export function generateToken(user: User): string {
     const payload = {
         id: user.id,
         name: user.name,
-        email: user.email,
-        password: user.password
+        email: user.email
     }
     return jwt.sign(payload, JWT_SECRET, {expiresIn: "1d"});
 }
