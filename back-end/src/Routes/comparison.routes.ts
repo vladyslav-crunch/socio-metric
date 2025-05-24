@@ -1,9 +1,11 @@
 import express from 'express';
 import multer from 'multer';
 import { handleMergeData } from '../Controllers/comparison.controller';
+import {authenticateJWT} from "../Middleware/auth.middleware";
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
+router.use(authenticateJWT);
 
 router.post(
     '/merge-data',
