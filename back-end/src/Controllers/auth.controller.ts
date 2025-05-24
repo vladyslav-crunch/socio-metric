@@ -17,7 +17,7 @@ export const register = async (req: Request, res: Response) => {
     const user = repo.create({ name, email, password: hashed });
     await repo.save(user);
     const token = generateToken(user);
-    res.status(201).json({ message: 'User registered',  token });
+    res.status(201).json({ message: 'User registered', user, token });
 };
 
 export const login = async (req: Request, res: Response) => {
@@ -30,5 +30,5 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = generateToken(user!);
-    res.json({ token });
+    res.json({ user, token });
 };
