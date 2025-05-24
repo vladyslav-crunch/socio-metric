@@ -6,6 +6,7 @@ import { AppDataSource } from "./data-source";
 import authRoutes from "./Routes/auth.routes";
 import mergeRoutes from "./Routes/comparison.routes";
 import cors from "cors";
+import logger from "./Middleware/logger";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -14,7 +15,7 @@ app.use(
     origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // Optional: only if you're using cookies or auth headers
+    credentials: true,
   })
 );
 if (!PORT) {
@@ -23,6 +24,7 @@ if (!PORT) {
 }
 
 app.use(express.json());
+app.use(logger);
 
 app.use("/auth", authRoutes);
 app.use("/comparison", mergeRoutes);
