@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export default function SignUp() {
@@ -6,10 +6,10 @@ export default function SignUp() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [error, setError] = useState("");
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setError("");
     const res = await fetch("http://localhost:3000/auth/register", {
       method: "POST",
       body: JSON.stringify({ name, email, password }),
@@ -18,13 +18,18 @@ export default function SignUp() {
     });
 
     if (!res.ok) {
-      alert("Sign up failed");
+      try {
+        const errData = await res.json();
+        setError(errData.message || "Sign up failed.");
+      } catch {
+        setError("Sign up failed.");
+      }
       return;
     }
 
     const data = await res.json();
     localStorage.setItem("token", data.token); // Store JWT
-    navigate("/dashboard");
+    navigate("/");
   };
 
   return (
@@ -64,6 +69,13 @@ export default function SignUp() {
         >
           Sign Up
         </button>
+        <p className="mt-2 text-center">
+          Already heave an account?{" "}
+          <Link to={"/sign-in"} className="text-blue-500">
+            Sign in
+          </Link>
+        </p>
+        <p className="text-center text-red-400">{error}</p>
       </form>
     </div>
   );

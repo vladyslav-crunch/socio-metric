@@ -5,7 +5,7 @@ export const fetchUser = async () => {
   const token = localStorage.getItem("token"); // or sessionStorage
   if (!token) throw new Error("No token");
 
-  const res = await fetch("https://your.api/me", {
+  const res = await fetch("http://localhost:3000/auth/", {
     headers: {
       Authorization: `Bearer ${token}`,
     },

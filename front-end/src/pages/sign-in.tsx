@@ -1,21 +1,22 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function SignIn() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [error, setError] = useState("");
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("https://your.api/login", {
+    setError("");
+    const res = await fetch("http://localhost:3000/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
       headers: { "Content-Type": "application/json" },
     });
 
     if (!res.ok) {
-      alert("Login failed");
+      setError("Invalid credential");
       return;
     }
 
@@ -53,6 +54,13 @@ export default function SignIn() {
         >
           Sign In
         </button>
+        <p className="mt-2 text-center">
+          Don't have an account?{" "}
+          <Link to={"/sign-up"} className="text-blue-500">
+            Sign up
+          </Link>
+        </p>
+        <p className="text-center text-red-400">{error}</p>
       </form>
     </div>
   );
