@@ -30,8 +30,16 @@ export const handleMergeData = async (req: Request, res: Response): Promise<void
         const { crime, unemployment } = req.body;
         const user = (req as any).user;
 
-        if (!crime?.records || !unemployment?.records) {
-            res.status(400).json({ error: 'Invalid payload structure.' });
+        const errors: string[] = [];
+
+        if (!crime) errors.push('Missing "crime" section');
+        else if (!Array.isArray(crime.records)) errors.push('"crime.records" must be an array');
+
+        if (!unemployment) errors.push('Missing "unemployment" section');
+        else if (!Array.isArray(unemployment.records)) errors.push('"unemployment.records" must be an array of arrays');
+
+        if (errors.length > 0) {
+            res.status(400).json({ error: errors });
             return;
         }
 
