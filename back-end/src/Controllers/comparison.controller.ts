@@ -12,13 +12,14 @@ interface ParsedCrime {
 }
 
 interface ParsedUnemployment {
-    country: string;
+    country_name: string;
+    country_code: string;
     year: number;
     unemployment_rate: number;
 }
 
 interface MergedEntry {
-    country: string;
+    country_name: string;
     country_code: string;
     year: number;
     crime_rate: number;
@@ -36,7 +37,7 @@ export const handleMergeData = async (req: Request, res: Response): Promise<void
         else if (!Array.isArray(crime.records)) errors.push('"crime.records" must be an array');
 
         if (!unemployment) errors.push('Missing "unemployment" section');
-        else if (!Array.isArray(unemployment.records)) errors.push('"unemployment.records" must be an array of arrays');
+        else if (!Array.isArray(unemployment.records)) errors.push('"unemployment.records" must be an array');
 
         if (errors.length > 0) {
             res.status(400).json({ error: errors });
@@ -51,10 +52,11 @@ export const handleMergeData = async (req: Request, res: Response): Promise<void
             user: user
         }));
 
-        const unemploymentRecords = unemployment.records.flat().map((record: any) => ({
-            country: record.country,
-            year: record.year,
-            unemployment_rate: record.unemployment_rate,
+        const unemploymentRecords = unemployment.records.map((record: any) => ({
+            country_name: record.country_name,
+            country_code: record.country_code,
+            year: parseInt(record.year),
+            unemployment_rate: parseFloat(record.unemployment_rate),
             user: user
         }));
 
@@ -68,14 +70,17 @@ export const handleMergeData = async (req: Request, res: Response): Promise<void
 
         // Create merged data
         const mergedData = crimeRecords.map((crime: ParsedCrime) => {
-            const match = unemploymentRecords.find((u: ParsedUnemployment) => u.country === crime.country_code && u.year === crime.year);
-
+            const match = unemploymentRecords.find((u: ParsedUnemployment) => u.country_code === crime.country_code && u.year === crime.year);
+            if (!match) {
+                console.log('Crime:', crime.country_code, crime.year);
+                console.log('Unemployment candidates:', unemploymentRecords.map((u: ParsedUnemployment) => `${u.country_code}-${u.year}`));
+            }
             const merged = {
-                country: crime.country_name,
+                country_name: crime.country_name,
                 country_code: crime.country_code,
                 year: crime.year,
                 crime_rate: crime.crime_rate,
-                unemployment_rate: match?.unemployment_rate ?? null
+                unemployment_rate: match?.unemployment_rate
             };
 
             return merged;
@@ -85,7 +90,7 @@ export const handleMergeData = async (req: Request, res: Response): Promise<void
         const mergedRepo = AppDataSource.getRepository(CrimeUnemploymentRecord);
         await mergedRepo.save(
             mergedData.map((data: MergedEntry) => ({
-                country: data.country,
+                country: data.country_name,
                 country_code: data.country_code,
                 year: data.year,
                 crime_rate: data.crime_rate,
@@ -102,7 +107,7 @@ export const handleMergeData = async (req: Request, res: Response): Promise<void
                 chartDataByYear[entry.year] = [];
             }
             chartDataByYear[entry.year].push({
-                country: entry.country,
+                country: entry.country_name,
                 unemployment: entry.unemployment_rate,
                 crime: entry.crime_rate
             });

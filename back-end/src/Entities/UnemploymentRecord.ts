@@ -11,7 +11,10 @@ export class UnemploymentRecord {
     year!: number;
 
     @Column()
-    country!: string;
+    country_name!: string;
+
+    @Column()
+    country_code!: string;
 
     @Column('float')
     unemployment_rate!: number;
