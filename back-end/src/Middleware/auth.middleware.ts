@@ -4,7 +4,7 @@ import { AppDataSource } from '../data-source';
 import { verifyToken } from '../utils/jwt';
 import { JwtPayload } from 'jsonwebtoken';
 
-export const authenticateJWT = (req: Request, res: Response, next: NextFunction): void => {
+export const authenticateJWT = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
         res.sendStatus(401);

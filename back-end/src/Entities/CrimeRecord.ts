@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column} from 'typeorm';
-// import { User } from './User';
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne} from 'typeorm';
+import { User } from './User';
 
 @Entity()
 export class CrimeRecord {
@@ -10,8 +10,14 @@ export class CrimeRecord {
     year!: number;
 
     @Column()
-    type!: string;
+    country_name!: string;
 
     @Column()
-    count!: number;
+    country_code!: string;
+
+    @Column('float')
+    crime_rate!: number;
+
+    @ManyToOne(() => User)
+    user!: User;
 }

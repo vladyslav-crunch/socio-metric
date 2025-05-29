@@ -4,16 +4,8 @@ import { handleMergeData } from '../Controllers/comparison.controller';
 import {authenticateJWT} from "../Middleware/auth.middleware";
 
 const router = express.Router();
-const upload = multer({ dest: 'uploads/' });
 router.use(authenticateJWT);
 
-router.post(
-    '/merge-data',
-    upload.fields([
-        { name: 'crimeData', maxCount: 1 },
-        { name: 'unemploymentData', maxCount: 1 }
-    ]),
-    handleMergeData
-);
+router.post('/merge-data', express.json(), handleMergeData);
 
 export default router;

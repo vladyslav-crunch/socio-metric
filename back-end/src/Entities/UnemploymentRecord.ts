@@ -1,4 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { User } from './User';
+import { ManyToOne } from 'typeorm';
 
 @Entity()
 export class UnemploymentRecord {
@@ -8,6 +10,12 @@ export class UnemploymentRecord {
     @Column()
     year!: number;
 
-    @Column('decimal')
-    rate!: number;
+    @Column()
+    country!: string;
+
+    @Column('float')
+    unemployment_rate!: number;
+
+    @ManyToOne(() => User)
+    user!: User;
 }
