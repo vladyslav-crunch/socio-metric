@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="SocioMetricService"
+             targetNamespace="http://example.com/getData"
+             xmlns:tns="http://example.com/getData"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <types>
+        <xsd:schema targetNamespace="http://example.com/getData"
+                    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                    xmlns:tns="http://example.com/getData">
+
+
+            <xsd:complexType name="CrimeRecord">
+                <xsd:sequence>
+                    <xsd:element name="year" type="xsd:int"/>
+                    <xsd:element name="country_name" type="xsd:string"/>
+                    <xsd:element name="country_code" type="xsd:string"/>
+                    <xsd:element name="crime_rate" type="xsd:double"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="CrimeRecordList">
+                    <xsd:sequence>
+                        <xsd:element name="record" type="tns:CrimeRecord" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:element name="getCrimeData">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="token" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="getCrimeDataResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="records" type="tns:CrimeRecordList"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <!-- UnemploymentRecord Row -->
+            <xsd:complexType name="UnemploymentRecord">
+                <xsd:sequence>
+                    <xsd:element name="year" type="xsd:int"/>
+                    <xsd:element name="country_name" type="xsd:string"/>
+                    <xsd:element name="country_code" type="xsd:string"/>
+                    <xsd:element name="unemployment_rate" type="xsd:double"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <!-- List of Unemployment Records -->
+            <xsd:complexType name="UnemploymentRecordList">
+                <xsd:sequence>
+                    <xsd:element name="record" type="tns:UnemploymentRecord" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <!-- Request/Response for getUnemploymentData -->
+            <xsd:element name="getUnemploymentData">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="token" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="getUnemploymentDataResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="records" type="tns:UnemploymentRecordList"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <!-- CrimeUnemploymentRecord Row -->
+            <xsd:complexType name="CrimeUnemploymentRecord">
+                <xsd:sequence>
+                    <xsd:element name="country" type="xsd:string"/>
+                    <xsd:element name="country_code" type="xsd:string"/>
+                    <xsd:element name="year" type="xsd:int"/>
+                    <xsd:element name="crime_rate" type="xsd:double"/>
+                    <xsd:element name="unemployment_rate" type="xsd:double"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <!-- List of CrimeUnemployment Records -->
+            <xsd:complexType name="CrimeUnemploymentRecordList">
+                <xsd:sequence>
+                    <xsd:element name="record" type="tns:CrimeUnemploymentRecord" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <!-- Request/Response Elements -->
+            <xsd:element name="getMergedData">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="token" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="getMergedDataResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="records" type="tns:CrimeUnemploymentRecordList"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+
+        </xsd:schema>
+    </types>
+
+
+    <!-- Wiadomości -->
+    <message name="GetCrimeDataRequest">
+        <part name="parameters" element="tns:getCrimeData"/>
+    </message>
+
+    <message name="GetCrimeDataResponse">
+        <part name="parameters" element="tns:getCrimeDataResponse"/>
+    </message>
+
+    <message name="GetUnemploymentDataRequest">
+        <part name="parameters" element="tns:getUnemploymentData"/>
+    </message>
+
+    <message name="GetUnemploymentDataResponse">
+        <part name="parameters" element="tns:getUnemploymentDataResponse"/>
+    </message>
+
+    <message name="GetMergedDataRequest">
+        <part name="parameters" element="tns:getMergedData"/>
+    </message>
+
+    <message name="GetMergedDataResponse">
+        <part name="parameters" element="tns:getMergedDataResponse"/>
+    </message>
+
+
+
+    <!-- Port typu operacji -->
+    <portType name="SocioMetricPortType">
+        <operation name="getCrimeData">
+            <input message="tns:GetCrimeDataRequest"/>
+            <output message="tns:GetCrimeDataResponse"/>
+        </operation>
+        <operation name="getUnemploymentData">
+            <input message="tns:GetUnemploymentDataRequest"/>
+            <output message="tns:GetUnemploymentDataResponse"/>
+        </operation>
+        <operation name="getMergedData">
+            <input message="tns:GetMergedDataRequest"/>
+            <output message="tns:GetMergedDataResponse"/>
+        </operation>
+    </portType>
+
+    <!-- Wiązanie (binding) -->
+    <binding name="SocioMetricBinding" type="tns:SocioMetricPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <operation name="getCrimeData">
+            <soap:operation soapAction="getCrimeData"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="getUnemploymentData">
+            <soap:operation soapAction="getUnemploymentData"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="getMergedData">
+            <soap:operation soapAction="getMergedData"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+
+    <!-- Usługa -->
+    <service name="SocioMetricService">
+        <port name="SocioMetricPort" binding="tns:SocioMetricBinding">
+            <soap:address location="http://localhost:3000/soap/getData"/>
+        </port>
+    </service>
+</definitions>
+
+
+
