@@ -93,6 +93,11 @@ export const handleMergeData = async (req: Request, res: Response): Promise<void
             };
         });
 
+        // Clear existing records for the user before saving new data
+        await AppDataSource.getRepository(CrimeUnemploymentRecord).delete({ user: user });
+        await AppDataSource.getRepository(UnemploymentRecord).delete({ user: user });
+        await AppDataSource.getRepository(CrimeRecord).delete({ user: user });
+
         // Save crime records
         const crimeRepo = AppDataSource.getRepository(CrimeRecord);
         const savedCrime = await crimeRepo.save(crimeRecords);
