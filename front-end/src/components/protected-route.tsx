@@ -8,7 +8,6 @@ type Props = {
 
 export default function ProtectedRoute({ children }: Props) {
   const { data, isLoading, isError } = useUser();
-  console.log(data);
   if (isLoading) return <div></div>;
   if (isError || !data) return <Navigate to="/sign-in" />;
 

@@ -7,33 +7,44 @@ import {
   Tooltip,
   ResponsiveContainer,
   LabelList,
+  Label,
 } from "recharts";
 
-const data = [
-  { country: "USA", unemployment: 6.0, crime: 47.7 },
-  { country: "Canada", unemployment: 5.2, crime: 39.1 },
-  { country: "Germany", unemployment: 4.5, crime: 34.2 },
-  { country: "UK", unemployment: 4.8, crime: 40.3 },
-  { country: "France", unemployment: 7.1, crime: 36.5 },
-  { country: "Japan", unemployment: 2.9, crime: 21.8 },
-  { country: "India", unemployment: 7.2, crime: 44.6 },
-  { country: "Brazil", unemployment: 8.9, crime: 60.3 },
-  { country: "Australia", unemployment: 4.2, crime: 37.8 },
-  { country: "South Africa", unemployment: 9.0, crime: 75.5 },
-];
+type DataItem = {
+  country: string;
+  unemployment: number;
+  crime: number;
+};
 
-export default function UnemploymentCrimeChart() {
+type Props = {
+  data: DataItem[];
+};
+
+export default function UnemploymentCrimeChart({ data }: Props) {
   return (
     <ResponsiveContainer width="80%" height={500}>
-      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+      <ScatterChart margin={{ top: 20, right: 20, bottom: 40, left: 60 }}>
         <CartesianGrid />
-        <XAxis type="number" dataKey="crime" name="Crime Rate" unit="" />
+        <XAxis type="number" dataKey="crime" name="Crime Rate">
+          <Label
+            value="Crime Rate (per 100k people)"
+            position="bottom"
+            offset={0}
+          />
+        </XAxis>
         <YAxis
           type="number"
           dataKey="unemployment"
           name="Unemployment Rate"
           unit="%"
-        />
+        >
+          <Label
+            value="Unemployment Rate (%)"
+            angle={-90}
+            position="insideLeft"
+            style={{ textAnchor: "middle" }}
+          />
+        </YAxis>
         <Tooltip cursor={{ strokeDasharray: "3 3" }} />
         <Scatter name="Countries" data={data} fill="#8884d8">
           <LabelList dataKey="country" position="top" />

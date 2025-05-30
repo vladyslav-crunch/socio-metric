@@ -1,5 +1,6 @@
 // src/hooks/useUser.ts
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 export const fetchUser = async () => {
   const token = localStorage.getItem("token"); // or sessionStorage
@@ -20,5 +21,19 @@ export function useUser() {
     queryKey: ["user"],
     queryFn: fetchUser,
     retry: false,
+  });
+}
+
+export function useLogout() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  return useMutation({
+    mutationFn: async () => {
+      localStorage.removeItem("token");
+    },
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ["user"] });
+      navigate("/sign-in");
+    },
   });
 }

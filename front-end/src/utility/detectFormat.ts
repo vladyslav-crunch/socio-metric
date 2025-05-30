@@ -2,7 +2,7 @@ export function detectFormat(text: string) {
   try {
     JSON.parse(text);
     return "json";
-  } catch (e) {
+  } catch {
     try {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(text, "text/xml");

@@ -1,37 +1,61 @@
-import React, { useState, ChangeEvent } from "react";
-import UnemploymentCrimeChart from "./chart";
+import React, { useState, type ChangeEvent, type JSX } from "react";
+import { parseData } from "../utility/parseData";
+import { useMergeData } from "../hooks/useMergeData";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function FileUpload(): JSX.Element {
-  const [crimeFile, setCrimeFile] = useState<File | null>(null);
-  const [unemploymentFile, setUnemploymentFile] = useState<File | null>(null);
   const [crimeContent, setCrimeContent] = useState<string>("");
   const [unemploymentContent, setUnemploymentContent] = useState<string>("");
 
-  const handleCrimeFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setCrimeFile(file);
-    const reader = new FileReader();
-    reader.onload = (event) => setCrimeContent(event.target?.result as string);
-    reader.readAsText(file);
-  };
+  const { mutate, isPending } = useMergeData();
 
-  const handleUnemploymentFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    setContent: (text: string) => void
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUnemploymentFile(file);
     const reader = new FileReader();
-    reader.onload = (event) =>
-      setUnemploymentContent(event.target?.result as string);
+    reader.onload = (event) => setContent(event.target?.result as string);
     reader.readAsText(file);
   };
 
   const handleGenerateChart = () => {
-    console.log("Generating chart...");
+    if (!crimeContent.trim() || !unemploymentContent.trim()) {
+      toast.error("Both Crime and Unemployment data must be provided.");
+      return;
+    }
+
+    const crime = parseData(crimeContent);
+    const unemployment = parseData(unemploymentContent);
+  
+
+    if (!crime.records?.length || !unemployment.records?.length) {
+      toast.error(
+        "Parsed data is invalid or empty. Please check input formats."
+      );
+      return;
+    }
+
+    const output = { crime, unemployment };
+
+    mutate(output, {
+      onSuccess: () => toast.success("Data merged successfully!"),
+      onError: () =>
+        toast.error("Failed to merge data. Please check the input."),
+    });
+
+    // // Optional: Save input file
+    // const blob = new Blob([JSON.stringify(output, null, 2)], {
+    //   type: "application/json",
+    // });
+    // saveAs(blob, "merged-input-data.json");
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="bg-gray-100 p-6">
+      <ToastContainer position="bottom-left" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Crime Rate Section */}
         <div className="bg-white shadow p-6 rounded-xl">
@@ -50,7 +74,7 @@ export default function FileUpload(): JSX.Element {
             <input
               type="file"
               accept=".json,.xml"
-              onChange={handleCrimeFileChange}
+              onChange={(e) => handleFileChange(e, setCrimeContent)}
               className="hidden"
             />
           </label>
@@ -73,7 +97,7 @@ export default function FileUpload(): JSX.Element {
             <input
               type="file"
               accept=".json,.xml"
-              onChange={handleUnemploymentFileChange}
+              onChange={(e) => handleFileChange(e, setUnemploymentContent)}
               className="hidden"
             />
           </label>
@@ -84,12 +108,16 @@ export default function FileUpload(): JSX.Element {
       <div className="mt-10 flex justify-center">
         <button
           onClick={handleGenerateChart}
-          className="bg-blue-600 text-white px-6 py-3 rounded text-lg hover:bg-blue-700"
+          disabled={isPending}
+          className={`${
+            isPending
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          } text-white px-6 py-3 rounded text-lg`}
         >
-          Generate Chart
+          {isPending ? "Processing..." : "Generate Chart"}
         </button>
       </div>
-      <UnemploymentCrimeChart />
     </div>
   );
 }
