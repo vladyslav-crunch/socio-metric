@@ -1,28 +1,34 @@
+// src/server.ts
 import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
+import cors from "cors";
+import http from "http";
+import fs from "fs";
+import * as soap from "soap";
+
 import { AppDataSource } from "./data-source";
 import authRoutes from "./Routes/auth.routes";
 import mergeRoutes from "./Routes/comparison.routes";
-import cors from "cors";
 import logger from "./Middleware/logger";
+import { soapService } from "./soap/soap.service";
 
+const PORT = process.env.PORT || 3000;
+const FRONT_ORIGIN = "http://localhost:5173"; // <-- frontend origin
+
+/* ----------  EXPRESS APP  ---------- */
 const app = express();
-const PORT = process.env.PORT;
 
+// CORS for all REST routes
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: FRONT_ORIGIN,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "SOAPAction"],
   })
 );
-if (!PORT) {
-  console.error("Missing PORT in .env");
-  process.exit(1);
-}
 
 app.use(express.json());
 app.use(logger);
@@ -30,26 +36,36 @@ app.use(logger);
 app.use("/auth", authRoutes);
 app.use("/comparison", mergeRoutes);
 
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}`);
-// });
+/* ----------  CORS MIDDLEWARE JUST FOR SOAP  ---------- */
+app.use("/soap", (req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", FRONT_ORIGIN);
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, SOAPAction"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
 
-AppDataSource.initialize()
-  .then(() => console.log("Data source initialized successfully."))
-  .catch((err) => console.error("Data source init error", err));
-
-//soap
-import * as soap from 'soap';
-import * as fs from 'fs';
-import * as http from 'http';
-import { soapService } from './soap/soap.service';
-
-const wsdlXml = fs.readFileSync('./src/soap/service.wsdl', 'utf8');
-
-const server = http.createServer(app);
-
-soap.listen(server, '/soap/getData', soapService, wsdlXml);
-
-server.listen(PORT, () => {
-    console.log(`HTTP & SOAP Server running on port ${PORT}`);
+  // Pre-flight
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+    return;
+  }
+  next();
 });
+
+/* ----------  SOAP SERVICE  ---------- */
+const wsdl = fs.readFileSync("./src/soap/service.wsdl", "utf8");
+// we mount on the *same* express app (still one port)
+soap.listen(app, "/soap/getData", soapService, wsdl);
+
+/* ----------  DB + HTTP SERVER  ---------- */
+AppDataSource.initialize()
+  .then(() => console.log("DB initialized"))
+  .catch((err) => console.error("DB init error", err));
+
+http
+  .createServer(app)
+  .listen(PORT, () =>
+    console.log(`REST + SOAP server running on http://localhost:${PORT}`)
+  );

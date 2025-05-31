@@ -41,6 +41,7 @@ export const useSoapMerge = () => {
         method: "POST",
         headers: {
           "Content-Type": "text/xml;charset=UTF-8",
+          SOAPAction: "getMergedData",
         },
         body: soapBody,
       });
