@@ -3,10 +3,16 @@ import { useMergedData } from "../hooks/useMergeData";
 import UnemploymentCrimeChart from "./chart";
 import { XMLBuilder } from "fast-xml-parser";
 import { saveAs } from "file-saver";
+import { useSoapMerge } from "../hooks/useSoapMerge";
 
 export default function Statistic() {
   const { data: mergedData } = useMergedData();
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const { mutate: fetchSoapData } = useSoapMerge();
+
+  useEffect(() => {
+    fetchSoapData(); // Auto fetch on mount
+  }, []);
 
   const availableYears = mergedData
     ? Object.keys(mergedData)
