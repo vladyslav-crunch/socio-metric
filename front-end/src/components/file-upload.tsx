@@ -1,14 +1,26 @@
-import React, { useState, type ChangeEvent, type JSX } from "react";
+import React, { useState, type ChangeEvent, type JSX, useEffect } from "react";
 import { parseData } from "../utility/parseData";
 import { useMergeData } from "../hooks/useMergeData";
 import { toast, ToastContainer } from "react-toastify";
+import { useSoapInputs } from "../hooks/useSoapInputs";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function FileUpload(): JSX.Element {
-  const [crimeContent, setCrimeContent] = useState<string>("");
-  const [unemploymentContent, setUnemploymentContent] = useState<string>("");
+  const [crimeInput, setCrimeInput] = useState<string>("");
+  const [unemploymentInput, setUnemploymentInput] = useState<string>("");
 
+  const { crimeContent, unemploymentContent, isLoading, error } =
+    useSoapInputs();
   const { mutate, isPending } = useMergeData();
+
+  // Populate state with SOAP data once it's available
+  useEffect(() => {
+    if (crimeContent) setCrimeInput(crimeContent);
+  }, [crimeContent]);
+
+  useEffect(() => {
+    if (unemploymentContent) setUnemploymentInput(unemploymentContent);
+  }, [unemploymentContent]);
 
   const handleFileChange = (
     e: ChangeEvent<HTMLInputElement>,
@@ -22,14 +34,13 @@ export default function FileUpload(): JSX.Element {
   };
 
   const handleGenerateChart = () => {
-    if (!crimeContent.trim() || !unemploymentContent.trim()) {
+    if (!crimeInput.trim() || !unemploymentInput.trim()) {
       toast.error("Both Crime and Unemployment data must be provided.");
       return;
     }
 
-    const crime = parseData(crimeContent);
-    const unemployment = parseData(unemploymentContent);
-  
+    const crime = parseData(crimeInput);
+    const unemployment = parseData(unemploymentInput);
 
     if (!crime.records?.length || !unemployment.records?.length) {
       toast.error(
@@ -38,49 +49,53 @@ export default function FileUpload(): JSX.Element {
       return;
     }
 
-    const output = { crime, unemployment };
-
-    mutate(output, {
-      onSuccess: () => toast.success("Data merged successfully!"),
-      onError: () =>
-        toast.error("Failed to merge data. Please check the input."),
-    });
-
-    // // Optional: Save input file
-    // const blob = new Blob([JSON.stringify(output, null, 2)], {
-    //   type: "application/json",
-    // });
-    // saveAs(blob, "merged-input-data.json");
+    mutate(
+      { crime, unemployment },
+      {
+        onSuccess: () => toast.success("Data merged successfully!"),
+        onError: () =>
+          toast.error("Failed to merge data. Please check the input."),
+      }
+    );
   };
 
   return (
     <div className="bg-gray-100 p-6">
       <ToastContainer position="bottom-left" />
+
+      {isLoading && (
+        <p className="text-center text-gray-600 mb-4">Fetching SOAP data...</p>
+      )}
+      {error && (
+        <p className="text-center text-red-500 mb-4">
+          Failed to fetch data from SOAP API
+        </p>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Crime Rate Section */}
         <div className="bg-white shadow p-6 rounded-xl">
           <h2 className="text-xl font-semibold mb-2">Crime Rate</h2>
           <p className="text-sm text-gray-500 mb-2">
             Paste JSON or XML data in the box below, or import a file.
           </p>
+
           <textarea
             className="w-full h-32 p-2 border rounded mb-4"
-            placeholder="Paste JSON or XML data here..."
-            value={crimeContent}
-            onChange={(e) => setCrimeContent(e.target.value)}
+            value={crimeInput}
+            onChange={(e) => setCrimeInput(e.target.value)}
+            placeholder="Paste or auto-filled crime data"
           />
-          <label className="block w-full cursor-pointer bg-gray-200 text-center py-2 rounded hover:bg-gray-300">
+          <label className="block cursor-pointer bg-gray-200 text-center py-2 rounded hover:bg-gray-300">
             Choose Crime File (JSON or XML)
             <input
               type="file"
               accept=".json,.xml"
-              onChange={(e) => handleFileChange(e, setCrimeContent)}
+              onChange={(e) => handleFileChange(e, setCrimeInput)}
               className="hidden"
             />
           </label>
         </div>
 
-        {/* Unemployment Rate Section */}
         <div className="bg-white shadow p-6 rounded-xl">
           <h2 className="text-xl font-semibold mb-2">Unemployment Rate</h2>
           <p className="text-sm text-gray-500 mb-2">
@@ -88,23 +103,22 @@ export default function FileUpload(): JSX.Element {
           </p>
           <textarea
             className="w-full h-32 p-2 border rounded mb-4"
-            placeholder="Paste JSON or XML data here..."
-            value={unemploymentContent}
-            onChange={(e) => setUnemploymentContent(e.target.value)}
+            value={unemploymentInput}
+            onChange={(e) => setUnemploymentInput(e.target.value)}
+            placeholder="Paste or auto-filled unemployment data"
           />
-          <label className="block w-full cursor-pointer bg-gray-200 text-center py-2 rounded hover:bg-gray-300">
+          <label className="block cursor-pointer bg-gray-200 text-center py-2 rounded hover:bg-gray-300">
             Choose Unemployment File (JSON or XML)
             <input
               type="file"
               accept=".json,.xml"
-              onChange={(e) => handleFileChange(e, setUnemploymentContent)}
+              onChange={(e) => handleFileChange(e, setUnemploymentInput)}
               className="hidden"
             />
           </label>
         </div>
       </div>
 
-      {/* Generate Chart Button */}
       <div className="mt-10 flex justify-center">
         <button
           onClick={handleGenerateChart}
