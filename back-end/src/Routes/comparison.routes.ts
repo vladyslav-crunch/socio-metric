@@ -1,6 +1,6 @@
 import express from 'express';
 import { handleMergeData } from '../Controllers/comparison.controller';
-import {authenticateJWT} from "../Middleware/auth.middleware";
+import { authenticateJWT } from "../Middleware/auth.middleware";
 
 const router = express.Router();
 router.use(authenticateJWT);

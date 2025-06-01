@@ -42,7 +42,6 @@
                 </xsd:complexType>
             </xsd:element>
 
-            <!-- UnemploymentRecord Row -->
             <xsd:complexType name="UnemploymentRecord">
                 <xsd:sequence>
                     <xsd:element name="year" type="xsd:int"/>
@@ -52,14 +51,12 @@
                 </xsd:sequence>
             </xsd:complexType>
 
-            <!-- List of Unemployment Records -->
             <xsd:complexType name="UnemploymentRecordList">
                 <xsd:sequence>
                     <xsd:element name="record" type="tns:UnemploymentRecord" maxOccurs="unbounded"/>
                 </xsd:sequence>
             </xsd:complexType>
 
-            <!-- Request/Response for getUnemploymentData -->
             <xsd:element name="getUnemploymentData">
                 <xsd:complexType>
                     <xsd:sequence>
@@ -76,7 +73,6 @@
                 </xsd:complexType>
             </xsd:element>
 
-            <!-- CrimeUnemploymentRecord Row -->
             <xsd:complexType name="CrimeUnemploymentRecord">
                 <xsd:sequence>
                     <xsd:element name="country" type="xsd:string"/>
@@ -87,14 +83,12 @@
                 </xsd:sequence>
             </xsd:complexType>
 
-            <!-- List of CrimeUnemployment Records -->
             <xsd:complexType name="CrimeUnemploymentRecordList">
                 <xsd:sequence>
                     <xsd:element name="record" type="tns:CrimeUnemploymentRecord" maxOccurs="unbounded"/>
                 </xsd:sequence>
             </xsd:complexType>
 
-            <!-- Request/Response Elements -->
             <xsd:element name="getMergedData">
                 <xsd:complexType>
                     <xsd:sequence>
@@ -116,7 +110,6 @@
     </types>
 
 
-    <!-- Wiadomości -->
     <message name="GetCrimeDataRequest">
         <part name="parameters" element="tns:getCrimeData"/>
     </message>
@@ -143,7 +136,6 @@
 
 
 
-    <!-- Port typu operacji -->
     <portType name="SocioMetricPortType">
         <operation name="getCrimeData">
             <input message="tns:GetCrimeDataRequest"/>
@@ -159,7 +151,6 @@
         </operation>
     </portType>
 
-    <!-- Wiązanie (binding) -->
     <binding name="SocioMetricBinding" type="tns:SocioMetricPortType">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
 
@@ -194,7 +185,6 @@
         </operation>
     </binding>
 
-    <!-- Usługa -->
     <service name="SocioMetricService">
         <port name="SocioMetricPort" binding="tns:SocioMetricBinding">
             <soap:address location="http://localhost:3000/soap/getData"/>

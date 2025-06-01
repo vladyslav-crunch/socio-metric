@@ -15,28 +15,6 @@ interface MergeRequestPayload {
     };
 }
 
-// interface ParsedCrime {
-//     country_name: string;
-//     country_code: string;
-//     year: number;
-//     crime_rate: number;
-// }
-//
-// interface ParsedUnemployment {
-//     country_name: string;
-//     country_code: string;
-//     year: number;
-//     unemployment_rate: number;
-// }
-//
-// interface MergedEntry {
-//     country_name: string;
-//     country_code: string;
-//     year: number;
-//     crime_rate: number;
-//     unemployment_rate: number | null;
-// }
-
 export const handleMergeData = async (req: Request, res: Response): Promise<void> => {
     await AppDataSource.transaction("SERIALIZABLE", async (transactionalEntityManager) => {
         try {
@@ -89,11 +67,9 @@ export const handleMergeData = async (req: Request, res: Response): Promise<void
             await transactionalEntityManager.getRepository(UnemploymentRecord).delete({ user });
             await transactionalEntityManager.getRepository(CrimeRecord).delete({ user });
 
-            // ZAPIS NOWYCH
             await transactionalEntityManager.getRepository(CrimeRecord).save(crimeRecords);
             await transactionalEntityManager.getRepository(UnemploymentRecord).save(unemploymentRecords);
 
-            // Create merged data
             const mergedData = crimeRecords.map(crime => {
                 const match = unemploymentRecords.find(u => u.country_code === crime.country_code && u.year === crime.year);
                 return {
@@ -118,7 +94,6 @@ export const handleMergeData = async (req: Request, res: Response): Promise<void
                 return;
             }
 
-            // Save merged records
             await transactionalEntityManager.getRepository(CrimeUnemploymentRecord).save(
                 mergedData.map(data => ({
                     country: data.country_name,
@@ -130,7 +105,6 @@ export const handleMergeData = async (req: Request, res: Response): Promise<void
                 }))
             );
 
-            // FORMAT WYNIKU
             const chartDataByYear: Record<number, { country: string; unemployment: number | null; crime: number }[]> = {};
             for (const entry of mergedData) {
                 if (!chartDataByYear[entry.year]) chartDataByYear[entry.year] = [];

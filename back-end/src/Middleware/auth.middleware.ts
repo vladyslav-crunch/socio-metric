@@ -12,7 +12,7 @@ export const authenticateJWT = async (req: Request, res: Response, next: NextFun
     }
 
     try {
-        const payload = verifyToken(token) as JwtPayload & { id: number }; // Fix implicit any
+        const payload = verifyToken(token) as JwtPayload & { id: number };
         AppDataSource.getRepository(User).findOneBy({ id: payload.id })
             .then((user: User | null) => {
                 if (!user) {

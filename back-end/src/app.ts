@@ -1,4 +1,3 @@
-// src/server.ts
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -15,12 +14,10 @@ import logger from "./Middleware/logger";
 import { soapService } from "./soap/soap.service";
 
 const PORT = process.env.PORT || 3000;
-const FRONT_ORIGIN = "http://localhost:5173"; // <-- frontend origin
+const FRONT_ORIGIN = "http://localhost:5173";
 
-/* ----------  EXPRESS APP  ---------- */
 const app = express();
 
-// CORS for all REST routes
 app.use(
   cors({
     origin: FRONT_ORIGIN,
@@ -36,7 +33,6 @@ app.use(logger);
 app.use("/auth", authRoutes);
 app.use("/comparison", mergeRoutes);
 
-/* ----------  CORS MIDDLEWARE JUST FOR SOAP  ---------- */
 app.use("/soap", (req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", FRONT_ORIGIN);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -46,7 +42,6 @@ app.use("/soap", (req, res, next) => {
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
 
-  // Pre-flight
   if (req.method === "OPTIONS") {
     res.sendStatus(200);
     return;
@@ -54,12 +49,9 @@ app.use("/soap", (req, res, next) => {
   next();
 });
 
-/* ----------  SOAP SERVICE  ---------- */
 const wsdl = fs.readFileSync("./src/soap/service.wsdl", "utf8");
-// we mount on the *same* express app (still one port)
 soap.listen(app, "/soap/getData", soapService, wsdl);
 
-/* ----------  DB + HTTP SERVER  ---------- */
 AppDataSource.initialize()
   .then(() => console.log("DB initialized"))
   .catch((err) => console.error("DB init error", err));

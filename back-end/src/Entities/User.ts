@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column} from 'typeorm';
-// import { CrimeRecord } from './CrimeRecord';
 
 @Entity()
 export class User {
