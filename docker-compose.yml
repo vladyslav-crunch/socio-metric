@@ -1,18 +1,62 @@
-version: '3.8'
+version: "3.8"
 
 services:
+# ──────────────────────────────────────────────────────────────
   db:
     image: postgres:15
     container_name: postgres-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER:     postgres
       POSTGRES_PASSWORD: 754ut10s
-      POSTGRES_DB: unemployment_crime_db
+      POSTGRES_DB:       unemployment_crime_db
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+
+    ## ←─ Health-check: pg_isready returns 0 when the server
+    ##    has finished start-up and is accepting connections.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s     # give Postgres a moment to boot
+
+# ──────────────────────────────────────────────────────────────
+  backend-app:
+    build:
+      context: ./back-end
+      dockerfile: Dockerfile
+    container_name: backend-app
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgres://postgres:754ut10s@db:5432/unemployment_crime_db                       
+      - JWT_SECRET=7e4b1ad8e56c4e02a1a518e6f5ac108a47dd60f9c370caa9f042877b0717ecf0
+    depends_on:
+      db:
+        condition: service_healthy
+
+# ──────────────────────────────────────────────────────────────
+  front-end:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile
+    container_name: frontend-app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./front-end:/app                  
+      - /app/node_modules                 
+    stdin_open: true
+    tty: true
+    environment:
+      - HOST=0.0.0.0
+    depends_on:
+      - backend-app
 
 volumes:
   db_data:

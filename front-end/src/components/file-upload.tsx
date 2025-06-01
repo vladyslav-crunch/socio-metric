@@ -1,4 +1,4 @@
-import React, { useState, type ChangeEvent, type JSX, useEffect } from "react";
+import { useState, type ChangeEvent, type JSX, useEffect } from "react";
 import { parseData } from "../utility/parseData";
 import { useMergeData } from "../hooks/useMergeData";
 import { toast, ToastContainer } from "react-toastify";
@@ -13,7 +13,6 @@ export default function FileUpload(): JSX.Element {
     useSoapInputs();
   const { mutate, isPending } = useMergeData();
 
-  // Populate state with SOAP data once it's available
   useEffect(() => {
     if (crimeContent) setCrimeInput(crimeContent);
   }, [crimeContent]);

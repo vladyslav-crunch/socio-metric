@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useMergedData } from "../hooks/useMergeData";
 import UnemploymentCrimeChart from "./chart";
 import { XMLBuilder } from "fast-xml-parser";
