@@ -12,7 +12,7 @@ export const fetchUser = async () => {
   });
 
   if (!res.ok) throw new Error("Unauthorized");
-  return res.json(); 
+  return res.json();
 };
 
 export function useUser() {
@@ -31,7 +31,7 @@ export function useLogout() {
       localStorage.removeItem("token");
     },
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: ["user"] });
+      queryClient.clear();
       navigate("/sign-in");
     },
   });
