@@ -67,54 +67,39 @@ export const handleMergeData = async (req: Request, res: Response): Promise<void
             await transactionalEntityManager.getRepository(UnemploymentRecord).delete({ user });
             await transactionalEntityManager.getRepository(CrimeRecord).delete({ user });
 
-            await transactionalEntityManager.getRepository(CrimeRecord).save(crimeRecords);
-            await transactionalEntityManager.getRepository(UnemploymentRecord).save(unemploymentRecords);
+            const savedCrime = await transactionalEntityManager.getRepository(CrimeRecord).save(crimeRecords);
+            const savedUnemployment = await transactionalEntityManager.getRepository(UnemploymentRecord).save(unemploymentRecords);
+            const mergedRecordsToSave: CrimeUnemploymentRecord[] = [];
 
-            const mergedData = crimeRecords.map(crime => {
-                const match = unemploymentRecords.find(u => u.country_code === crime.country_code && u.year === crime.year);
-                return {
-                    country_name: crime.country_name,
-                    country_code: crime.country_code,
-                    year: crime.year,
-                    crime_rate: crime.crime_rate,
-                    unemployment_rate: match?.unemployment_rate ?? null,
-                    user: user
-                };
-            });
+            for (const crime of savedCrime) {
+                const match = savedUnemployment.find(u => u.country_code === crime.country_code && u.year === crime.year);
+                if (match) {
+                    const merged = new CrimeUnemploymentRecord();
+                    merged.crimeRecord = crime;
+                    merged.unemploymentRecord = match;
+                    merged.user = user;
+                    mergedRecordsToSave.push(merged);
+                }
+            }
 
-            const invalidMerged = mergedData.filter(e => e.unemployment_rate === null || typeof e.unemployment_rate === 'undefined');
-            if (invalidMerged.length > 0) {
-                res.status(400).json({
-                    error: 'Unemployment data is invalid for some merged records',
-                    details: invalidMerged.map(e => ({
-                        country: e.country_name,
-                        year: e.year
-                    }))
-                });
+            if (mergedRecordsToSave.length === 0) {
+                res.status(400).json({error: 'No matches found to merge crime and unemployment data.'});
                 return;
             }
 
-            await transactionalEntityManager.getRepository(CrimeUnemploymentRecord).save(
-                mergedData.map(data => ({
-                    country: data.country_name,
-                    country_code: data.country_code,
-                    year: data.year,
-                    crime_rate: data.crime_rate,
-                    unemployment_rate: data.unemployment_rate ?? undefined,
-                    user: data.user
-                }))
-            );
+            await transactionalEntityManager.getRepository(CrimeUnemploymentRecord).save(mergedRecordsToSave);
 
-            const chartDataByYear: Record<number, { country: string; unemployment: number | null; crime: number }[]> = {};
-            for (const entry of mergedData) {
-                if (!chartDataByYear[entry.year]) chartDataByYear[entry.year] = [];
-                chartDataByYear[entry.year].push({
-                    country: entry.country_name,
-                    unemployment: entry.unemployment_rate,
-                    crime: entry.crime_rate
+            const chartDataByYear: Record<number, { country: string; unemployment: number; crime: number }[]> = {};
+
+            for(const record of mergedRecordsToSave) {
+                const year = record.crimeRecord.year;
+                if(!chartDataByYear[year]) chartDataByYear[year] = [];
+                chartDataByYear[year].push({
+                    country: record.crimeRecord.country_name,
+                    unemployment: record.unemploymentRecord.unemployment_rate,
+                    crime: record.crimeRecord.crime_rate
                 });
             }
-
             res.json(chartDataByYear);
         } catch (error) {
             console.error('Error in merging data:', error);

@@ -1,25 +1,18 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { User} from "./User";
+import { Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { User } from './User';
+import { CrimeRecord } from './CrimeRecord';
+import { UnemploymentRecord } from './UnemploymentRecord';
 
 @Entity()
 export class CrimeUnemploymentRecord {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()
-    country!: string;
+    @ManyToOne(() => CrimeRecord, { eager: true })
+    crimeRecord!: CrimeRecord;
 
-    @Column()
-    country_code!: string;
-
-    @Column()
-    year!: number;
-
-    @Column('float')
-    crime_rate!: number;
-
-    @Column({ type: 'float', nullable: true })
-    unemployment_rate!: number;
+    @ManyToOne(() => UnemploymentRecord, { eager: true })
+    unemploymentRecord!: UnemploymentRecord;
 
     @ManyToOne(() => User)
     user!: User;

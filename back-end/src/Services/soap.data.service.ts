@@ -45,17 +45,17 @@ export const soapDataService = {
     async getMergedData(token: string) {
         const decoded = verifyToken(token);
         const repo = AppDataSource.getRepository(CrimeUnemploymentRecord);
-        const records = await repo
-            .createQueryBuilder("record")
-            .select([
-                "record.country AS country",
-                "record.country_code AS country_code",
-                "record.year AS year",
-                "record.crime_rate AS crime_rate",
-                "record.unemployment_rate AS unemployment_rate"
-            ])
-            .where("record.userId = :userId", { userId: decoded.id })
-            .getRawMany();
-        return records;
+        const records = await repo.find({
+            where: { user: { id: decoded.id } },
+            relations: ['crimeRecord', 'unemploymentRecord']
+        });
+
+        return records.map(record => ({
+            country: record.crimeRecord.country_name,
+            country_code: record.crimeRecord.country_code,
+            year: record.crimeRecord.year,
+            crime_rate: record.crimeRecord.crime_rate,
+            unemployment_rate: record.unemploymentRecord.unemployment_rate
+        }));
     }
 };
