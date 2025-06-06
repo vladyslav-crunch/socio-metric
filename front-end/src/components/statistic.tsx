@@ -54,7 +54,9 @@ export default function Statistic() {
 
   const handleExportXML = () => {
     const builder = new XMLBuilder({ format: true });
-    const xml = builder.build({ record: filteredData });
+    const xml = builder.build({
+      statistics: { countryRecord: filteredData },
+    });
     const blob = new Blob([xml], { type: "application/xml" });
     saveAs(blob, `data-${selectedYear}.xml`);
   };

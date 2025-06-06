@@ -10,7 +10,7 @@ const transformSoapToStructuredXml = async (
 
   const records = xmlDoc.getElementsByTagName("records");
   if (!records || records.length === 0) {
-    return ""; // No records found — return empty string
+    return ""; 
   }
 
   const root = document.implementation.createDocument("", "root", null);
@@ -45,7 +45,7 @@ const transformSoapToStructuredXml = async (
   });
 
   if (!hasAtLeastOneEntry) {
-    return ""; // No usable entries found — return empty string
+    return ""; 
   }
 
   const serializer = new XMLSerializer();

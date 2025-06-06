@@ -30,7 +30,6 @@ export const useMergeData = () => {
 
   return useMutation({
     mutationFn: async (data: ParsedInput) => {
-      console.log(data);
       const token = localStorage.getItem("token");
       const res = await fetch("http://localhost:3000/comparison/merge-data", {
         method: "POST",
@@ -46,7 +45,6 @@ export const useMergeData = () => {
       return res.json();
     },
     onSuccess: (data) => {
-      console.log(data);
       queryClient.setQueryData(["mergedData"], data);
     },
   });

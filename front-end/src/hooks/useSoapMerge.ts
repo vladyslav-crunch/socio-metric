@@ -56,7 +56,7 @@ export const useSoapMerge = () => {
 
       const dataArray: SoapMergedRecord[] = Array.isArray(records)
         ? records
-        : [records]; // Handle single record case
+        : [records]; 
 
       const mergedData: MergedDataByYear = {};
 
@@ -73,7 +73,6 @@ export const useSoapMerge = () => {
       return mergedData;
     },
     onSuccess: (data) => {
-      // Cache under the same key used by useMergedData
       queryClient.setQueryData(["mergedData"], data);
     },
   });
